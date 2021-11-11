@@ -6,19 +6,14 @@ import kotlin.random.Random
 
 class MainModel {
     private val mCache = mutableListOf<String>()
-    private val mItems = MutableSharedFlow<Result>()
-    private var mCurrentPage = 0
+    private val mItems = MutableSharedFlow<Result>(replay = 1)
 
-    suspend fun refreshItems():Flow<Result>{
-        mCache.clear()
-        mCurrentPage = 0
+    suspend fun loadPage(page:Int):Flow<Result>{
+        if (page == 0) {
+            mCache.clear()
+        }
         fetch()
         return mItems
-    }
-
-    suspend fun loadNextPage(){
-        fetch()
-        ++mCurrentPage
     }
 
     private suspend fun fetch():Result{

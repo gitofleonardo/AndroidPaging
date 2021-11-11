@@ -10,32 +10,32 @@ class MainViewModel:ViewModel() {
     private val mModel = MainModel()
 
     val state:LiveData<UIState>
-    val action:LiveData<UIAction>
+    val perform:(UIAction)->Unit
+
+    private val mPage:MutableLiveData<Int> = MutableLiveData()
 
     init {
-        action = MutableLiveData(UIAction(0))
-        state = action
+        state = mPage
             .distinctUntilChanged()
             .switchMap {
                 liveData {
-                    val result = mModel.refreshItems()
+                    val state = mModel.loadPage(it)
                         .map { r->
                             UIState(r)
                         }
-                        .asLiveData(Dispatchers.Main)
-                    emitSource(result)
+                    val liveData = state.asLiveData(Dispatchers.Main)
+                    emitSource(liveData)
                 }
             }
-    }
-
-    fun loadNextPage(){
-        GlobalScope.launch {
-            mModel.loadNextPage()
-        }
-    }
-    fun refresh(){
-        GlobalScope.launch {
-            mModel.refreshItems()
+        perform = {
+            when (it.action){
+                is Action.ActionRefresh->{
+                    mPage.postValue(0)
+                }
+                is Action.ActionNextPage->{
+                    mPage.postValue((mPage.value?:0)+1)
+                }
+            }
         }
     }
 }
@@ -43,6 +43,10 @@ class MainViewModel:ViewModel() {
 data class UIState(
     val result:Result
 )
+sealed interface Action {
+    object ActionRefresh : Action
+    object ActionNextPage : Action
+}
 data class UIAction(
-    var page:Int
+    var action:Action
 )

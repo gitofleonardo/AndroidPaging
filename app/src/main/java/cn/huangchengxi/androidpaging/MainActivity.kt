@@ -18,7 +18,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(mBinding.root)
-        mViewModel.action.value?.page = 0
         mBinding.rv.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = mAdapter
@@ -28,7 +27,7 @@ class MainActivity : AppCompatActivity() {
                         recyclerView.layoutManager?.let {
                             val lastVisible = (it as LinearLayoutManager).findLastVisibleItemPosition()
                             if (lastVisible == mItems.size-1){
-                                mViewModel.loadNextPage()
+                                mViewModel.perform.invoke(UIAction(Action.ActionNextPage))
                             }
                         }
                     }
@@ -36,7 +35,7 @@ class MainActivity : AppCompatActivity() {
             })
         }
         mBinding.srl.setOnRefreshListener {
-            mViewModel.refresh()
+            mViewModel.perform.invoke(UIAction(Action.ActionRefresh))
         }
         mViewModel.state.observe(this){
             when (it.result){
