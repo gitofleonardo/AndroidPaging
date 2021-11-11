@@ -7,6 +7,7 @@ import kotlin.random.Random
 class MainModel {
     private val mCache = mutableListOf<String>()
     private val mItems = MutableSharedFlow<Result>(replay = 1)
+    private var mCurPage = 0
 
     suspend fun loadPage(page:Int):Flow<Result>{
         if (page == 0) {
@@ -22,6 +23,15 @@ class MainModel {
         val result = Result.SuccessResult(mCache)
         mItems.emit(result)
         return result
+    }
+
+    suspend fun loadPage1(page: Int):Result{
+        mCurPage = page
+        if (mCurPage>5){
+            return Result.SuccessResult(emptyList(),++mCurPage)
+        }
+        val items = generateItems()
+        return Result.SuccessResult(items,++mCurPage)
     }
 
     private fun generateItems():List<String>{

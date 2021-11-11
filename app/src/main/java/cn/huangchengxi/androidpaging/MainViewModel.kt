@@ -1,8 +1,12 @@
 package cn.huangchengxi.androidpaging
 
 import androidx.lifecycle.*
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -11,6 +15,11 @@ class MainViewModel:ViewModel() {
 
     val state:LiveData<UIState>
     val perform:(UIAction)->Unit
+    val flow = Pager(
+        PagingConfig(pageSize = 20)
+    ){
+        MainPagingSource()
+    }.flow.cachedIn(viewModelScope)
 
     private val mPage:MutableLiveData<Int> = MutableLiveData()
 
